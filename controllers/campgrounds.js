@@ -83,10 +83,20 @@ module.exports.updateCampground = async (req, res) => {
 };
 
 module.exports.deleteCampground = async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
+  const campground = await Campground.findById(id);
+  
+  // 🧹 Delete images from Cloudinary
+  for (let img of campground.images) {
+    await cloudinary.uploader.destroy(img.filename);
+  }
+
+  // 🗑️ Delete campground from MongoDB
   await Campground.findByIdAndDelete(id);
-  req.flash("success", "Successfully deleted campground");
+
+  req.flash("success", "Successfully deleted campground and images");
   res.redirect("/campgrounds");
+
 };
 
 // const Campground = require("../models/campground");
